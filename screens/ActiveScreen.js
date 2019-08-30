@@ -1,35 +1,44 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, Text, ImageBackground, ScrollView } from 'react-native';
-import { TODOS } from '../constants/Utils';
 import TodoItem from '../constants/TodoItem';
-import { NavigationEvents } from 'react-navigation';
+import { db } from './TodoScreen';
+
+let itemsRef = db.ref('/TodoList');
 
 export default class ActiveScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      todoList: TODOS,
+      todoList: [],
     };
-    this.props.navigation.addListener(
-      'willFocus',
+    this.didFocusSubscription = props.navigation.addListener(
+      'didFocus',
       payload => {
-        this.setState({
-          todoList: TODOS,
-        })
+        itemsRef.on('value', (snapshot) => {
+          let data = snapshot.val();
+          let todoList = Object.values(data);
+          this.setState({ todoList });
+        });
       }
     );
   };
+  // componentDidMount() {
+  //   itemsRef.on('value', (snapshot) => {
+  //     let data = snapshot.val();
+  //     let todoList = Object.values(data);
+  //     this.setState({ todoList });
+  //   });
+  // }
   render() {
     const { todoList } = this.state;
     return (
       <ImageBackground source={require('../assets/images/background.jpg')} style={{ width: '100%', height: '100%' }}>
         <ScrollView>
           <View style={styles.container}>
-            <NavigationEvents onWillFocus={payload => this.setState({ todoList: TODOS, })} />
             <Text style={styles.titleTxt}>Active List</Text>
             {todoList.map(item => {
               if (item.status === 'Active') {
-                return <TodoItem key={item.id} data={item}/>
+                return <TodoItem key={item.id} data={item} />
               }
             })}
           </View>

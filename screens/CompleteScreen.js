@@ -1,24 +1,34 @@
 import React, { Component } from 'react';
 import { ImageBackground, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { TODOS } from '../constants/Utils';
 import TodoItem from '../constants/TodoItem';
+import { db } from './TodoScreen';
+
+let itemsRef = db.ref('/TodoList');
 
 export default class CompleteScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      todoList: TODOS,
+      todoList: [],
     };
-    this.props.navigation.addListener(
-      'willFocus',
+    this.didFocusSubscription = props.navigation.addListener(
+      'didFocus',
       payload => {
-        this.setState({
-          todoList: TODOS,
-        })
+        itemsRef.on('value', (snapshot) => {
+          let data = snapshot.val();
+          let todoList = Object.values(data);
+          this.setState({ todoList });
+        });
       }
     );
-
   };
+  // componentDidMount() {
+  //   itemsRef.on('value', (snapshot) => {
+  //     let data = snapshot.val();
+  //     let todoList = Object.values(data);
+  //     this.setState({ todoList });
+  //   });
+  // }
   render() {
     const { todoList } = this.state;
     return (
@@ -27,10 +37,10 @@ export default class CompleteScreen extends Component {
           <View style={styles.container}>
             <Text style={styles.titleTxt}>Complete List</Text>
             {todoList.map(item => {
-                if (item.status === 'Done') {
-                  return <TodoItem key={item.id} data={item} />
-                }
-              })}
+              if (item.status === 'Done') {
+                return <TodoItem key={item.id} data={item} />
+              }
+            })}
           </View>
         </ScrollView>
       </ImageBackground>

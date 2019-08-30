@@ -1,0 +1,44 @@
+{
+    "TodoList": [
+        {
+            "id": 0,
+            "status": "Done",
+            "body": "Todo 1"
+        },
+        {
+            "id": 1,
+            "status": "Done",
+            "body": "Todo 2"
+        },
+        {
+            "id": 2,
+            "status": "Done",
+            "body": "Todo 3"
+        },
+        {
+            "id": 3,
+            "status": "Active",
+            "body": "Todo 4"
+        },
+        {
+            "id": 4,
+            "status": "Active",
+            "body": "Todo 5"
+        },
+        {
+            "id": 5,
+            "status": "Active",
+            "body": "Todo 6"
+        },
+        {
+            "id": 6,
+            "status": "Active",
+            "body": "Todo 7"
+        },
+        {
+            "id": 7,
+            "status": "Active",
+            "body": "Todo 8"
+        }
+    ]
+}

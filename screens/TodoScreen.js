@@ -1,18 +1,68 @@
 import React from 'react';
 import { StyleSheet, ImageBackground, Text, View, ScrollView, TextInput, KeyboardAvoidingView, TouchableOpacity, Alert } from 'react-native';
-import { TODOS } from '../constants/Utils';
 import TodoItem from '../constants/TodoItem';
-import { NavigationEvents } from 'react-navigation';
+import firebase from 'firebase';
 
-
+const firebaseConfig = {
+  apiKey: "AIzaSyBsts-t1LbwEg5gwTv-jmTSwUlcmtw538k",
+  authDomain: "todolist-87c73.firebaseapp.com",
+  databaseURL: "https://todolist-87c73.firebaseio.com",
+  projectId: "todolist-87c73",
+  storageBucket: "",
+  messagingSenderId: "404609300932",
+  appId: "1:404609300932:web:ae9376b130ccd72a"
+};
+let todo = firebase.initializeApp(firebaseConfig);
+export const db = todo.database();
+console.log(db)
+let itemsRef = db.ref('/TodoList');
+const Additem = (item) => {
+  db.ref('/TodoList/' + item.id).set({
+    ...item
+  });
+};
+const RemoveItem = (id) => {
+  db.ref('/TodoList/' + id).remove();
+}
+export const UpdateBodyItem = (id, body) => {
+  if (body !== '') {
+    db.ref('/TodoList/' + id).update({
+      'body': body,
+    });
+  }
+  else
+    console.log("Don't any Edit");
+}
+export const UpdateStatusItem = (id, status) => {
+  db.ref('/TodoList/' + id).update({
+    'status': status,
+  });
+}
 export default class TodoScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      todoList: TODOS,
+      todoList: [],
       inputText: ''
     };
-  }
+    this.didFocusSubscription = props.navigation.addListener(
+      'didFocus',
+      payload => {
+        itemsRef.on('value', (snapshot) => {
+          let data = snapshot.val();
+          let todoList = Object.values(data);
+          this.setState({ todoList });
+        });
+      }
+    );
+  };
+  // componentDidMount() {
+  //   itemsRef.on('value', (snapshot) => {
+  //     let data = snapshot.val();
+  //     let todoList = Object.values(data);
+  //     this.setState({ todoList });
+  //   });
+  // }
   onchange = text => {
     this.setState({
       inputText: text
@@ -31,19 +81,12 @@ export default class TodoScreen extends React.Component {
         status: 'Active',
         body: inputText,
       };
-      const newTodoList = [...todoList, newTodoItem];
+      todoList.splice(todoList.length, 0, newTodoItem)
       this.setState({
-        todoList: newTodoList,
-        inputText: ''
+        todoList: todoList,
+        inputText: '',
       });
-      this.props.navigation.addListener(
-        'willFocus',
-        payload => {
-          this.setState({
-            todoList: newTodoList,
-          })
-        }
-      );
+      Additem(newTodoItem);
     }
   }
   onPressItem = id => {
@@ -71,24 +114,25 @@ export default class TodoScreen extends React.Component {
     const { todoList } = this.state;
     const foundIndex = todoList.findIndex(todo => todo.id === id);
     todoList.splice(foundIndex, 1);
+    RemoveItem(id);
     this.setState({
       todoList: todoList
     })
   };
   render() {
-    const { todoList, inputText } = this.state;
+    const { todoList, inputText } = this.state
+    console.log(todoList)
     return (
-      <ImageBackground source={require('../assets/images/background.jpg')} style={{width: '100%', height: '100%'}}>
+      <ImageBackground source={require('../assets/images/background.jpg')} style={{ width: '100%', height: '100%' }}>
         <KeyboardAvoidingView enabled behavior="position">
           <ScrollView>
             <View style={styles.container}>
-              <NavigationEvents onWillFocus={payload => this.setState({ todoList: TODOS, })} />
               <Text style={styles.titleTxt}>Todo List({todoList.length})</Text>
-              {todoList.map(item => {
+              {todoList.map((item, index) => {
                 return (
                   <TodoItem
+                    key={index}
                     data={item}
-                    key={item.id}
                     onLongPressButton={() => this.onLongPressItem(item)}
                     onPressButton={() => this.onPressItem(item.id)}
                   />
@@ -128,8 +172,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 15,
     color: 'black',
-    alignItems: 'center', 
-    width: '90%', 
+    alignItems: 'center',
+    width: '90%',
     alignSelf: 'center'
   },
   titleTxt: {
@@ -144,7 +188,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     backgroundColor: 'black',
-    justifyContent: 'center', 
+    justifyContent: 'center',
     alignSelf: 'center',
     marginBottom: 10
   },
