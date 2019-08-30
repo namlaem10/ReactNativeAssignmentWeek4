@@ -18,3 +18,4 @@ Assignment - Week 4 - Homework - Intro to Navigation (Todo List App)
 
 - GIF hướng dẫn:
 
+![TodoList](https://user-images.githubusercontent.com/50457569/62837088-67da0080-bc95-11e9-9a87-3ed57eb81185.gif)
